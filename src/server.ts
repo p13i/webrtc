@@ -38,6 +38,8 @@ export class Server {
 
   private handleSocketConnection(): void {
     this.io.on("connection", socket => {
+        
+      console.log('connection');
       const existingSocket = this.activeSockets.find(
         existingSocket => existingSocket === socket.id
       );
@@ -57,6 +59,8 @@ export class Server {
       }
 
       socket.on("call-user", (data: any) => {
+        
+        console.log('call-user');
         socket.to(data.to).emit("call-made", {
           offer: data.offer,
           socket: socket.id
@@ -64,6 +68,8 @@ export class Server {
       });
 
       socket.on("make-answer", data => {
+        
+        console.log('make-answer');
         socket.to(data.to).emit("answer-made", {
           socket: socket.id,
           answer: data.answer
@@ -71,12 +77,17 @@ export class Server {
       });
 
       socket.on("reject-call", data => {
+        
+        console.log('reject-call');
         socket.to(data.from).emit("call-rejected", {
           socket: socket.id
         });
       });
 
       socket.on("disconnect", () => {
+        
+        console.log('disconnect');
+        
         this.activeSockets = this.activeSockets.filter(
           existingSocket => existingSocket !== socket.id
         );
@@ -88,7 +99,7 @@ export class Server {
   }
 
   public listen(callback: (port: number) => void): void {
-    this.httpServer.listen(this.DEFAULT_PORT, () => {
+    this.httpServer.listen({host: '0.0.0.0', port: this.DEFAULT_PORT}, () => {
       callback(this.DEFAULT_PORT);
     });
   }

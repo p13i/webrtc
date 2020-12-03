@@ -39,7 +39,7 @@ export class Server {
   private handleSocketConnection(): void {
     this.io.on("connection", socket => {
         
-      console.log('connection');
+      console.log('connection', socket);
       const existingSocket = this.activeSockets.find(
         existingSocket => existingSocket === socket.id
       );
@@ -47,6 +47,7 @@ export class Server {
       if (!existingSocket) {
         this.activeSockets.push(socket.id);
 
+        console.log('update-user-list', this.activeSockets);
         socket.emit("update-user-list", {
           users: this.activeSockets.filter(
             existingSocket => existingSocket !== socket.id
@@ -60,7 +61,7 @@ export class Server {
 
       socket.on("call-user", (data: any) => {
         
-        console.log('call-user');
+        console.log('call-user', data);
         socket.to(data.to).emit("call-made", {
           offer: data.offer,
           socket: socket.id
@@ -69,7 +70,7 @@ export class Server {
 
       socket.on("make-answer", data => {
         
-        console.log('make-answer');
+        console.log('make-answer', data);
         socket.to(data.to).emit("answer-made", {
           socket: socket.id,
           answer: data.answer
@@ -78,7 +79,7 @@ export class Server {
 
       socket.on("reject-call", data => {
         
-        console.log('reject-call');
+        console.log('reject-call', data);
         socket.to(data.from).emit("call-rejected", {
           socket: socket.id
         });
@@ -91,6 +92,9 @@ export class Server {
         this.activeSockets = this.activeSockets.filter(
           existingSocket => existingSocket !== socket.id
         );
+        
+        console.log('remove-user', this.activeSockets);
+        
         socket.broadcast.emit("remove-user", {
           socketId: socket.id
         });
